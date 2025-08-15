@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Player Stats - Full</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      color: #00ffff;
+      text-align: center;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 20px;
+      margin: 0 5px;
+      cursor: pointer;
+      border: 1px solid #00ffff;
+      border-radius: 5px;
+      background-color: #1a1a1a;
+      color: #00ffff;
+    }
+    .tab.active {
+      background-color: #00ffff;
+      color: #121212;
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #222;
+      color: #ccc;
+    }
+    tr:nth-child(even) {
+      background-color: #1c1c1c;
+    }
+    .rating-elite {
+      color: #27AA50;
+      font-weight: bold;
+    }
+    .rating-good {
+      color: #52BB53;
+      font-weight: bold;
+    }
+    .rating-bad {
+      color: #FF3E34;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Player Stats</h1>
+
+  <div class="tabs">
+    <div class="tab active" onclick="loadData('aas', this)">Aba AAS</div>
+    <div class="tab" onclick="loadData('teste2', this)">Aba TESTE2</div>
+  </div>
+
+  <table id="statsTable">
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th>RDS</th>
+        <th>Rating</th>
+        <th>K-D (+/-)</th>
+        <th>Entry (+/-)</th>
+        <th>KST%</th>
+        <th>KPR</th>
+        <th>SRV</th>
+        <th>1vsX</th>
+        <th>1k</th>
+        <th>2k</th>
+        <th>3k</th>
+        <th>4k</th>
+        <th>OK%</th>
+        <th>1vsX%</th>
+        <th>Pistol Rating</th>
+        <th>Pistol K-D</th>
+        <th>Pistol Entry</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const baseUrl = 'https://opensheet.elk.sh/1DNpe8pagrXOsY7WS6HICqBnILtMHDUIpz8Pfbu7iYMQ/';
+    const columns = [
+      "Player", "RDS", "Rating", "K-D (+/-)", "Entry (+/-)",
+      "KST%", "KPR", "SRV", "1vsX", "1k", "2k", "3k", "4k",
+      "OK%", "1vsX%", "Pistol Rating", "Pistol K-D", "Pistol Entry"
+    ];
+
+    function loadData(sheetName, tabElement) {
+      const url = baseUrl + sheetName;
+      const tbody = document.querySelector("#statsTable tbody");
+      tbody.innerHTML = "";
+
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      tabElement.classList.add('active');
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            columns.forEach(col => {
+              const td = document.createElement('td');
+              const value = row[col] || "";
+
+              if (col === "Rating") {
+                const num = parseFloat(value.replace(",", "."));
+                if (!isNaN(num)) {
+                  if (num >= 1.35) td.classList.add('rating-elite');
+                  else if (num >= 1.25) td.classList.add('rating-good');
+                  else if (num <= 0.65) td.classList.add('rating-bad');
+                }
+              }
+
+              td.textContent = value;
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          tbody.innerHTML = "<tr><td colspan='18' style='color:red;'>Erro ao carregar os dados.</td></tr>";
+        });
+    }
+
+    // Carrega a aba "aas" por padrão
+    loadData("aas", document.querySelector(".tab.active"));
+  </script>
+
+</body>
+</html>
